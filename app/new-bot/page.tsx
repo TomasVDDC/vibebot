@@ -27,7 +27,23 @@ export default function NewBot() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await addBot(values.botToken);
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${values.botToken}/getMyName`);
+
+      if (response.ok) {
+        await addBot(values.botToken);
+      } else {
+        form.setError("botToken", {
+          type: "manual",
+          message: "Invalid bot token. Please check your token and try again.",
+        });
+      }
+    } catch {
+      form.setError("botToken", {
+        type: "manual",
+        message: "An error occurred while validating the bot token. Please try again.",
+      });
+    }
   }
 
   return (
