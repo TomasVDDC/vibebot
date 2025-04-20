@@ -11,11 +11,11 @@ export const usersTable = pgTable("users", {
 });
 
 export const botsTable = pgTable("bots", {
-  botId: bigint("bot_id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  userId: varchar("user_id", { length: 255 })
+  botId: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 255 })
     .notNull()
     .references(() => usersTable.userId, { onDelete: "cascade" }),
-  botToken: varchar("bot_token", { length: 255 }).unique().notNull(),
-  botName: varchar("bot_name", { length: 100 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  botToken: varchar({ length: 255 }).unique().notNull(),
+  botName: varchar({ length: 100 }),
+  createdAt: timestamp().defaultNow().notNull(),
 });

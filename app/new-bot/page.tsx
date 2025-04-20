@@ -38,11 +38,8 @@ export default function NewBot() {
           message: "Invalid bot token. Please check your token and try again.",
         });
       }
-    } catch {
-      form.setError("botToken", {
-        type: "manual",
-        message: "An error occurred while validating the bot token. Please try again.",
-      });
+    } catch (error) {
+      console.error(error);
     }
   }
 

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { botsTable } from "@/app/db/schema";
 import db from "@/app/db";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 // ----------------------- BOT ACTIONS -----------------------
 export async function addBot(botToken: string) {
@@ -11,12 +11,11 @@ export async function addBot(botToken: string) {
   if (!userId) {
     throw new Error("You must be signed in to add a bot");
   }
-  await db.insert(botsTable).values({ botToken, userId });
-  // Return the updated list of todos
-  //revalidatePath("/");
+  const botId = await db.insert(botsTable).values({ botToken, userId }).returning({ botId: botsTable.botId });
+  console.log(botId);
+  redirect(`/build-bot/${botId[0].botId}`);
 }
 
-//Get all bots of user
 export async function getBots() {
   const { userId } = await auth();
   if (!userId) {
@@ -26,7 +25,6 @@ export async function getBots() {
   return userBots;
 }
 
-//Get bot token from botId
 export async function getBotToken(botId: string) {
   const { userId } = await auth();
   if (!userId) {
