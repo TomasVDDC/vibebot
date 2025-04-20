@@ -1,11 +1,14 @@
 import BotDetails from "@/components/BotDetails";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import SandboxInitializer from "@/app/components/SandboxInitializer";
+
 export default async function BuildBot(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const botId = params.id;
 
   return (
     <div>
+      <SandboxInitializer botId={botId} />
       <BotDetails botId={botId} />
 
       <div className="flex justify-center items-center my-12">
