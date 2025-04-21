@@ -4,15 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { addBot } from "@/app/actions/actions";
 import Image from "next/image";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useActionState } from "react";
+
+const initialState = { message: null, errors: null };
 
 export default function NewBot() {
+  const [state, formAction] = useActionState(addBot, initialState);
+
   const formSchema = z.object({
     botToken: z.string().min(1, {
       message: "Bot token is required.",
@@ -25,23 +30,6 @@ export default function NewBot() {
       botToken: "",
     },
   });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const response = await fetch(`https://api.telegram.org/bot${values.botToken}/getMyName`);
-
-      if (response.ok) {
-        await addBot(values.botToken);
-      } else {
-        form.setError("botToken", {
-          type: "manual",
-          message: "Invalid bot token. Please check your token and try again.",
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   return (
     <>
@@ -74,7 +62,7 @@ export default function NewBot() {
               <Image src="/botfather.jpeg" alt="botfather" width={100} height={100} />
             </div>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <form action={formAction} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="botToken"
@@ -85,13 +73,11 @@ export default function NewBot() {
                         <Input placeholder="123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ" {...field} />
                       </FormControl>
                       <FormDescription className="font-dm-sans">This allows you to customize your bot.</FormDescription>
-                      <FormMessage />
+                      <FormMessage>{state?.message}</FormMessage>
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full font-dm-sans">
-                  Submit
-                </Button>
+                <SubmitButton />
               </form>
             </Form>
           </CardContent>

@@ -6,13 +6,37 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 // ----------------------- BOT ACTIONS -----------------------
-export async function addBot(botToken: string) {
+
+export async function addBot(
+  prevState: {
+    message: string;
+  },
+  formData: FormData
+) {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("You must be signed in to add a bot");
+    return { message: "You must be signed in to add a bot" };
   }
-  const botId = await db.insert(botsTable).values({ botToken, userId }).returning({ botId: botsTable.botId });
-  console.log(botId);
+  const botToken = formData.get("botToken");
+  if (!botToken) {
+    return { message: "Bot token is required" };
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/getMyName`);
+  if (!response.ok) {
+    return { message: "Invalid bot token. Please check your token and try again." };
+  }
+
+  let botId;
+  try {
+    botId = await db
+      .insert(botsTable)
+      .values({ botToken: botToken as string, userId })
+      .returning({ botId: botsTable.botId });
+  } catch (error) {
+    console.error("Failed to add bot:", error);
+    return { message: "Failed to add bot to database" };
+  }
   redirect(`/build-bot/${botId[0].botId}`);
 }
 
