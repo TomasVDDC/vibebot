@@ -18,9 +18,8 @@ export async function POST(req: Request) {
 
   const domain = sbx.getHost(Number(process.env.SANDBOX_PORT));
 
-  const result4 = await sbx.commands.run("node bot-template-code.js", {
+  await sbx.commands.run("node bot-template-code.js", {
     envs: { WEBHOOK_DOMAIN: domain },
-    onError: (error) => console.error("error:", error),
     onStdout: (data) => console.log("stdout:", data),
     onStderr: (data) => console.error("stderr:", data),
   });
