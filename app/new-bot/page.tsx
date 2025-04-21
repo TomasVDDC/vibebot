@@ -13,7 +13,7 @@ import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActionState } from "react";
 
-const initialState = { message: null, errors: null };
+const initialState = { message: "", errors: null };
 
 export default function NewBot() {
   const [state, formAction] = useActionState(addBot, initialState);

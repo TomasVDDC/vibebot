@@ -3,8 +3,9 @@ import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import db from "@/app/db";
 import { usersTable } from "@/app/db/schema";
 import { eq } from "drizzle-orm";
+import { NextRequest } from "next/server";
 
-export async function POST(req) {
+export async function POST(req: NextRequest) {
   try {
     // Checks the WEBHOOK_SIGNING_SECRET env variable
     const evt = await verifyWebhook(req);
