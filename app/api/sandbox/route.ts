@@ -16,18 +16,6 @@ export async function POST(req: Request) {
     envs: { BOT_TOKEN_NEWBOT: botToken, PORT: process.env.SANDBOX_PORT! },
   });
 
-  const result = await sbx.commands.run("ls -l ../../");
-  console.log("Current directory contents:");
-  console.log(result);
-
-  const result2 = await sbx.commands.run("pwd");
-  console.log("\nCurrent working directory:");
-  console.log(result2);
-
-  const result3 = await sbx.commands.run("ls -l");
-  console.log("\nContents of /home/user/:");
-  console.log(result3);
-
   const domain = sbx.getHost(Number(process.env.SANDBOX_PORT));
 
   const result4 = await sbx.commands.run("node bot-template-code.js", {
