@@ -15,7 +15,7 @@ export const botsTable = pgTable("bots", {
   userId: varchar({ length: 255 })
     .notNull()
     .references(() => usersTable.userId, { onDelete: "cascade" }),
+  telegramBotId: bigint({ mode: "number" }).unique().notNull(),
   botToken: varchar({ length: 255 }).unique().notNull(),
-  botName: varchar({ length: 100 }),
   createdAt: timestamp().defaultNow().notNull(),
 });
