@@ -1,22 +1,32 @@
-import BotDetails from "@/components/BotDetails";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import SandboxInitializer from "@/app/components/SandboxInitializer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import SandboxInitializer from "@/components/SandboxInitializer";
+import BotHeader from "@/components/BotHeader";
+import { Separator } from "@/components/ui/separator";
+import { getBotCommands } from "@/app/actions/actions";
 
 export default async function BuildBot(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const botId = params.id;
+  const botCommands = await getBotCommands(botId);
 
   return (
     <div>
-      <SandboxInitializer botId={botId} />
-      <BotDetails botId={botId} />
-
-      <div className="flex justify-center items-center my-12">
-        <Alert className="w-1/2">
-          <AlertTitle>Your bot is live!</AlertTitle>
-          <AlertDescription>You can now interact with on Telegram. Send a message to start chatting with your bot.</AlertDescription>
-        </Alert>
-      </div>
+      {/* <SandboxInitializer botId={botId} /> */}
+      <BotHeader botId={botId} />
+      <Separator />
+      <Card>
+        <CardHeader>
+          <CardTitle>Bot Commands</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {botCommands.map((command: any) => (
+            <div key={command.command}>
+              <p>{command.command}</p>
+              <p>{command.description}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       {/* <div className="flex flex-col items-center justify-center h-[600px]">
         <div className="text-center max-w-md px-6 py-8 rounded-lg shadow-md bg-white border border-gray-100">
