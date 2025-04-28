@@ -4,6 +4,11 @@ import { Separator } from "@/components/ui/separator";
 import { getBotCommands } from "@/app/actions/actions";
 import PromptForm from "@/components/PromptForm";
 
+type BotCommands = {
+  command: string;
+  description: string;
+};
+
 export default async function BuildBot(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const botId = params.id;
@@ -28,7 +33,7 @@ export default async function BuildBot(props: { params: Promise<{ id: string }> 
           <CardTitle>Bot Commands</CardTitle>
         </CardHeader>
         <CardContent>
-          {botCommands.map((command: any) => (
+          {botCommands.map((command: BotCommands) => (
             <div key={command.command}>
               <p>{command.command}</p>
               <p>{command.description}</p>
