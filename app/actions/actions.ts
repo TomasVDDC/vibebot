@@ -124,6 +124,7 @@ export async function getBotCommands(botId: string) {
   if (!response.ok) {
     throw new Error("Failed to get bot commands");
   }
-  const botData = await response.json();
-  return botData.result;
+  const botCommands = await response.json();
+  console.log("botCommands", botCommands);
+  return botCommands.result;
 }

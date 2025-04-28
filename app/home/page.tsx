@@ -14,7 +14,7 @@ export default async function Home() {
             <CardTitle>No Bots Found</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You haven't created any bots yet.</p>
+            <p>You have not created any bots yet.</p>
           </CardContent>
         </Card>
       ) : (
@@ -26,14 +26,14 @@ export default async function Home() {
             </CardHeader>
             {/* <CardContent></CardContent> */}
             <CardFooter className="flex-col gap-2">
-              <Button className="w-full" variant="default">
+              <Button className="w-full cursor-pointer" variant="default">
                 <a href={`https://t.me/${bot.username}`} target="_blank" rel="noopener noreferrer" className="flex items-center">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open in Telegram
                 </a>
               </Button>
               <Link href={`/home/${bot.id}`} className="w-full">
-                <Button variant="neutral" className="w-full">
+                <Button variant="neutral" className="w-full cursor-pointer">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Edit Bot
                 </Button>
