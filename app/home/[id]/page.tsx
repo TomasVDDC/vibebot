@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SandboxInitializer from "@/components/SandboxInitializer";
 import BotHeader from "@/components/BotHeader";
 import { Separator } from "@/components/ui/separator";
 import { getBotCommands } from "@/app/actions/actions";
+import PromptForm from "@/components/PromptForm";
 
 export default async function BuildBot(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -10,11 +10,20 @@ export default async function BuildBot(props: { params: Promise<{ id: string }> 
   const botCommands = await getBotCommands(botId);
 
   return (
-    <div>
-      {/* <SandboxInitializer botId={botId} /> */}
+    <div className="p-4">
       <BotHeader botId={botId} />
       <Separator />
-      <Card>
+
+      <Card className="mt-4 max-w-md">
+        <CardHeader>
+          <CardTitle>Prompt</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PromptForm botId={botId} />
+        </CardContent>
+      </Card>
+
+      <Card className="max-w-md mt-4">
         <CardHeader>
           <CardTitle>Bot Commands</CardTitle>
         </CardHeader>

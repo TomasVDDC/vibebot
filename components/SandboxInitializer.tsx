@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function SandboxInitializer({ botId }: { botId: string }) {
+export default function SandboxInitializer({ botId, prompt }: { botId: string; prompt: string }) {
   useEffect(() => {
     const initializeSandbox = async () => {
       try {
@@ -11,7 +11,7 @@ export default function SandboxInitializer({ botId }: { botId: string }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ botId }),
+          body: JSON.stringify({ botId, prompt }),
         });
 
         if (!response.ok) {
