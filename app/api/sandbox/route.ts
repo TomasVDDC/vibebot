@@ -4,7 +4,7 @@ import { getBotToken } from "@/app/actions/actions";
 
 export async function POST(req: Request) {
   console.log("Starting sandbox");
-  const { botId } = await req.json();
+  const { botId, code } = await req.json();
   const botToken = await getBotToken(botId);
   console.log(botToken);
   if (!botToken) {
@@ -17,6 +17,9 @@ export async function POST(req: Request) {
   });
 
   const domain = sbx.getHost(Number(process.env.SANDBOX_PORT));
+
+  await sbx.files.write("bot-template-code.js", code);
+  console.log(`Copied file to bot-template-code.js in ${sbx.sandboxId}`);
 
   await sbx.commands.run("node bot-template-code.js", {
     envs: { WEBHOOK_DOMAIN: domain },
