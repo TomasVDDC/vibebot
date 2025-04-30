@@ -10,13 +10,18 @@ export async function POST(req: Request) {
   const { prompt } = await req.json();
   const completePrompt = promptStart + prompt;
 
-  const result = streamObject({
-    model: anthropic("claude-3-5-sonnet-20241022"),
-    schema: answerSchema,
-    prompt: completePrompt,
-  });
+  try {
+    const result = streamObject({
+      model: anthropic("claude-3-5-sonnet-20241022"),
+      schema: answerSchema,
+      prompt: completePrompt,
+    });
 
-  return result.toTextStreamResponse();
+    return result.toTextStreamResponse();
+  } catch (error) {
+    console.error("Error streaming object:", error);
+    return new Response("Error streaming object", { status: 500 });
+  }
 }
 
 // import { anthropic } from "@ai-sdk/anthropic";
