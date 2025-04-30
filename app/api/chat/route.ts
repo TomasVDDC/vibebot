@@ -16,7 +16,6 @@ export async function POST(req: Request) {
       schema: answerSchema,
       prompt: completePrompt,
     });
-
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Error streaming object:", error);

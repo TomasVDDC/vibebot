@@ -6,7 +6,6 @@ export async function POST(req: Request) {
   console.log("Starting sandbox");
   const { botId, code } = await req.json();
   const botToken = await getBotToken(botId);
-  console.log(botToken);
   if (!botToken) {
     return new Response("Bot not found", { status: 404 });
   }

@@ -88,9 +88,14 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
     },
   });
 
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    handleSubmit(e);
+    form.reset();
+  };
+
   return (
     <Form {...form}>
-      <form className="space-y-8" onSubmit={handleSubmit}>
+      <form className="space-y-8" onSubmit={onSubmit}>
         <FormField
           control={form.control}
           name="prompt"
