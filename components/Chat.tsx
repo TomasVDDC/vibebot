@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Message } from "@/lib/messages";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { answerSchema } from "@/app/api/chat/answer-schema";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,9 +15,11 @@ import { LoaderIcon } from "lucide-react";
 export default function Chat({ botId }: { botId: string }) {
   const [messages, setMessages] = useState<Message[]>([{ content: "Hello, how are you?" }]);
 
-  const { object, submit, isLoading } = useObject({
+  const { submit, isLoading } = useObject({
+    // When the submit function is called, it will call the /api/chat endpoint
     api: "/api/chat",
     schema: answerSchema,
+    // The response from the /api/chat endpoint will be the object
     onFinish: async ({ object }) => {
       setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "" }]);
 
