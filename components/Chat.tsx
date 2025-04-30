@@ -10,6 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
+import { LoaderIcon } from "lucide-react";
 
 export default function Chat({ botId }: { botId: string }) {
   const [messages, setMessages] = useState<Message[]>([{ content: "Hello, how are you?" }]);
@@ -18,7 +19,7 @@ export default function Chat({ botId }: { botId: string }) {
     api: "/api/chat",
     schema: answerSchema,
     onFinish: async ({ object }) => {
-      setMessages([...messages, { content: object?.commentary ?? "" }]);
+      setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "" }]);
 
       try {
         const response = await fetch("/api/sandbox", {
@@ -59,6 +60,12 @@ export default function Chat({ botId }: { botId: string }) {
             <div key={index}>{message.content}</div>
           ))}
         </div>
+        {isLoading && (
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <LoaderIcon strokeWidth={2} className="animate-spin w-4 h-4" />
+            <span>Generating...</span>
+          </div>
+        )}
         <ChatInput handleSubmit={handleSubmit} />
       </CardContent>
     </Card>
