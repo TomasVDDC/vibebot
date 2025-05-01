@@ -57,9 +57,14 @@ export default function Chat({ botId }: { botId: string }) {
         <CardTitle>Chat</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-2">
           {messages.map((message, index) => (
-            <div key={index}>{message.content}</div>
+            <div
+              key={index}
+              className={`p-3 rounded-lg ${index % 2 === 0 ? "bg-primary/10 ml-auto max-w-[80%]" : "bg-secondary/20 mr-auto max-w-[80%]"}`}
+            >
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            </div>
           ))}
         </div>
         {isLoading && (
