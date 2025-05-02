@@ -36,14 +36,12 @@ export default function NewBot() {
       <div className="flex flex-col items-center justify-center h-screen">
         <Card className="max-w-md bg-white">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold font-dm-sans">Create Your Telegram Bot</CardTitle>
-            <CardDescription className="font-dm-sans">
-              To create a new bot, you&apos;ll need a bot token from Telegram&apos;s BotFather.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold ">Create Your Telegram Bot</CardTitle>
+            <CardDescription className="">To create a new bot, you&apos;ll need a bot token from Telegram&apos;s BotFather.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <ol className="text-left space-y-3 font-dm-sans">
+              <ol className="text-left space-y-3 ">
                 <li>
                   1. Open Telegram and search for <span className="font-semibold">@BotFather</span>
                 </li>
@@ -68,11 +66,11 @@ export default function NewBot() {
                   name="botToken"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-dm-sans">Bot Token</FormLabel>
+                      <FormLabel className="">Bot Token</FormLabel>
                       <FormControl>
                         <Input placeholder="123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ" {...field} />
                       </FormControl>
-                      <FormDescription className="font-dm-sans">This allows you to customize your bot.</FormDescription>
+                      <FormDescription className="">This allows you to customize your bot.</FormDescription>
                       <FormMessage>{state?.message}</FormMessage>
                     </FormItem>
                   )}

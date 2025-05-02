@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { DM_Sans } from "next/font/google";
+// import { Montserrat } from "next/font/google";
 import "./globals.css";
 
-const DMSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-});
+// const DMSans = Montserrat({
+//   variable: "--font-dm-sans",
+//   subsets: ["latin"],
+//   weight: "800",
+// });
 
 export const metadata: Metadata = {
   title: "Vibebot",
@@ -21,7 +22,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${DMSans.variable} antialiased`}>{children}</body>
+        <body> {children} </body>
+        {/* <body className={`${DMSans.variable} antialiased`}>{children}</body> */}
       </html>
     </ClerkProvider>
   );

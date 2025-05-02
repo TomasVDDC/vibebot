@@ -7,7 +7,7 @@ export function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button disabled={pending} type="submit" className="w-full font-dm-sans">
+    <Button disabled={pending} type="submit" className="w-full ">
       {pending ? <Loader2 className="animate-spin" /> : "Submit"}
     </Button>
   );
