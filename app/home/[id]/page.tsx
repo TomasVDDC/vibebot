@@ -18,22 +18,22 @@ export default async function BuildBot(props: { params: Promise<{ id: string }> 
     <div className="p-4">
       <BotHeader botId={botId} />
       <Separator />
-
-      <Chat botId={botId} />
-
-      <Card className="max-w-md mt-4">
-        <CardHeader>
-          <CardTitle>Bot Commands</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {botCommands.map((command: BotCommands) => (
-            <div key={command.command}>
-              <p>{command.command}</p>
-              <p>{command.description}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <div className="flex flex-row justify-between gap-4">
+        <Chat botId={botId} />
+        <Card className="max-w-md mx-auto mt-6">
+          <CardHeader>
+            <CardTitle>Bot Commands</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {botCommands.map((command: BotCommands) => (
+              <div key={command.command}>
+                <p>{command.command}</p>
+                <p>{command.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

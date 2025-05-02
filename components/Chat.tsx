@@ -11,9 +11,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
 import { LoaderIcon } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 export default function Chat({ botId }: { botId: string }) {
-  const [messages, setMessages] = useState<Message[]>([{ content: "Hello, how are you?" }]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const { submit, isLoading } = useObject({
     // When the submit function is called, it will call the /api/chat endpoint
@@ -52,9 +53,9 @@ export default function Chat({ botId }: { botId: string }) {
   }
 
   return (
-    <Card>
+    <Card className="border-none shadow-none w-[700px]">
       <CardHeader>
-        <CardTitle>Chat</CardTitle>
+        <CardTitle></CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-2">
@@ -100,19 +101,27 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
 
   return (
     <Form {...form}>
-      <form className="space-y-8" onSubmit={onSubmit}>
+      <form className="space-y-8 border-2 rounded-2xl" onSubmit={onSubmit}>
         <FormField
           control={form.control}
           name="prompt"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="border-none m-2">
               <FormControl>
-                <Input placeholder="Add a /start command that responds with 'Hello, how are you?'" {...field} />
+                <Input
+                  className="border-none shadow-none [&::placeholder]:text-lg focus-visible:ring-0 focus:outline-none"
+                  placeholder="Describe your bot..."
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <div className="flex justify-end m-3">
+          <Button type="submit" variant="default">
+            <ArrowUp className="size-5" />
+          </Button>
+        </div>
       </form>
     </Form>
   );
