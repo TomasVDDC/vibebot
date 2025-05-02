@@ -33,7 +33,7 @@ export default async function Home() {
                 </a>
               </Button>
               <Link href={`/home/${bot.id}`} className="w-full">
-                <Button variant="neutral" className="w-full cursor-pointer">
+                <Button variant="default" className="w-full cursor-pointer">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Edit Bot
                 </Button>

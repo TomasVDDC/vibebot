@@ -1,5 +1,5 @@
 import React from "react";
-import { SidebarTrigger } from "./sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -13,7 +13,7 @@ const PagePrimaryBar = () => (
 
     <span className="text-lg font-bold"> Home </span>
     <Link className="ml-auto" href="/new-bot">
-      <Button className="cursor-pointer" variant="noShadow">
+      <Button className="cursor-pointer" variant="default">
         New Bot
       </Button>
     </Link>

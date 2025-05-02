@@ -33,7 +33,7 @@ export default async function BotHeader({ botId }: { botId: string }) {
           </Tooltip>
         </TooltipProvider>
 
-        <Button variant="neutral" asChild>
+        <Button variant="default" asChild>
           <a href={`https://t.me/${bot.username}`} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="h-4 w-4 mr-2" />
             Open in Telegram
