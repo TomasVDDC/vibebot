@@ -1,4 +1,10 @@
-export const promptStart = `import { Telegraf } from "telegraf";
+// Currently the prompt is just the code that is already written in the bot-template-code.js file
+// The prompt should be a description of the bot and the features that it should have
+import { instructions } from "./instructions";
+
+export const promptStart =
+  instructions +
+  `import { Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
 import { createServer } from "http";
 import dotenv from "dotenv";

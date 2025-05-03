@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   }
 
   const sbx = await Sandbox.create("up2804tjykjwxv6uvbel", {
-    timeoutMs: 60000,
+    timeoutMs: 300000,
     envs: { BOT_TOKEN_NEWBOT: botToken, PORT: process.env.SANDBOX_PORT! },
   });
 
