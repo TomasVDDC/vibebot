@@ -34,26 +34,31 @@ export default function NewBot() {
   return (
     <>
       <div className="flex flex-col items-center justify-center h-screen">
-        <Card className="max-w-md bg-white">
+        <Card className="max-w-md bg-white border-primary shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold ">Create Your Telegram Bot</CardTitle>
+            <CardTitle className="text-2xl font-bold text-primary ">Create Your Telegram Bot</CardTitle>
             <CardDescription className="">To create a new bot, you&apos;ll need a bot token from Telegram&apos;s BotFather.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6">
               <ol className="text-left space-y-3 ">
                 <li>
-                  1. Open Telegram and search for <span className="font-semibold">@BotFather</span>
+                  <strong>1.</strong> Open Telegram and search for <span className="font-semibold text-primary">@BotFather</span>
                 </li>
                 <li>
-                  2. Start a chat with BotFather and send the command <span className="font-mono bg-gray-100 px-2 py-1 rounded">/newbot</span>
+                  <strong>2.</strong> Start a chat with BotFather and send the command{" "}
+                  <span className="font-mono bg-gray-100 px-2 py-1 rounded text-primary">/newbot</span>
                 </li>
-                <li>3. Follow the instructions to name your bot</li>
                 <li>
-                  4. BotFather will give you a token that looks like{" "}
-                  <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ</span>
+                  <strong>3.</strong> Follow the instructions to name your bot
                 </li>
-                <li>5. Copy and paste that token below</li>
+                <li>
+                  <strong>4.</strong> BotFather will give you a token that looks like{" "}
+                  <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs text-primary">123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ</span>
+                </li>
+                <li>
+                  <strong>5.</strong> Copy and paste that token below
+                </li>
               </ol>
             </div>
             <div className="flex justify-center mb-6">

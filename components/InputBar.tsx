@@ -20,11 +20,11 @@ export default function InputBar() {
   }, []);
 
   return (
-    <div className="rounded-4xl shadow-2xl border-2 border-[#2464c7] w-[700px] p-2">
+    <div className="rounded-4xl shadow-2xl border-2 border-primary w-[700px] p-2">
       <div className="w-max">
         <h1
           key={currentMessageIndex}
-          className="animate-typing overflow-hidden whitespace-nowrap border-r-2 text-[#2464c7] border-r-[#2464c7] pr-2 font-bold"
+          className="animate-typing overflow-hidden whitespace-nowrap border-r-2 text-primary border-r-primary pr-2 font-bold"
         >
           {messages[currentMessageIndex]}
         </h1>
