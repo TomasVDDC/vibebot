@@ -1,18 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BotCommands } from "@/lib/bots";
-import { getBotCommands, getBotDescription } from "@/app/actions/actions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-export default function BotInfo({ botId, isLoading }: { botId: string; isLoading: boolean }) {
-  const { data: botCommands } = useQuery({
-    queryKey: ["botCommands", botId],
-    queryFn: () => getBotCommands(botId),
-  });
-  const { data: botDescription } = useQuery({
-    queryKey: ["botDescription", botId],
-    queryFn: () => getBotDescription(botId),
-  });
 
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function BotInfo({
+  isBotCommandsLoading,
+  botDescription,
+  botCommands,
+}: {
+  isBotCommandsLoading: boolean;
+  botDescription: string;
+  botCommands: BotCommands[];
+}) {
   return (
     <>
       {/* Bot Description Card */}
@@ -28,7 +27,7 @@ export default function BotInfo({ botId, isLoading }: { botId: string; isLoading
           <CardTitle className="flex items-center gap-2">Bot Commands</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isLoading ? (
+          {isBotCommandsLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
