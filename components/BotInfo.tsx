@@ -19,7 +19,13 @@ export default function BotInfo({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">Bot Description</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">{botDescription}</CardContent>
+        <CardContent className="space-y-4">
+          {!botDescription ? (
+            <p className="text-sm text-muted-foreground">The bot description will be displayed here when available.</p>
+          ) : (
+            botDescription
+          )}
+        </CardContent>
       </Card>
       {/* Bot Commands Card */}
       <Card className="max-w-md min-w-[300px] mx-auto mt-6">
@@ -33,8 +39,10 @@ export default function BotInfo({
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
+          ) : !botCommands?.length ? (
+            <p className="text-sm text-muted-foreground">Bot commands will be shown here once configured.</p>
           ) : (
-            botCommands?.map((command: BotCommands) => (
+            botCommands.map((command: BotCommands) => (
               <div key={command.command} className="rounded-lg border bg-card p-2 transition-colors hover:bg-accent/50">
                 <p className="font-mono text-sm font-medium text-primary pl-4"> {`/${command.command}`}</p>
                 <p className="text-sm text-muted-foreground pl-4">{command.description}</p>
