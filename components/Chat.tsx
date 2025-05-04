@@ -1,9 +1,5 @@
-"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
 import { Message } from "@/lib/messages";
-import { experimental_useObject as useObject } from "@ai-sdk/react";
-import { answerSchema } from "@/app/api/chat/answer-schema";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,35 +9,14 @@ import { Button } from "./ui/button";
 import { LoaderIcon } from "lucide-react";
 import { ArrowUp } from "lucide-react";
 
-export default function Chat({ botId }: { botId: string }) {
-  const [messages, setMessages] = useState<Message[]>([]);
+interface ChatProps {
+  messages: Message[];
+  setMessages: (messages: Message[]) => void;
+  isLoading: boolean;
+  submit: (prompt: { prompt: string }) => void;
+}
 
-  const { submit, isLoading } = useObject({
-    // When the submit function is called, it will call the /api/chat endpoint
-    api: "/api/chat",
-    schema: answerSchema,
-    // The response from the /api/chat endpoint will be the object
-    onFinish: async ({ object }) => {
-      setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "" }]);
-
-      try {
-        const response = await fetch("/api/sandbox", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ botId, code: object?.code }),
-        });
-
-        if (!response.ok) {
-          console.error("Failed to initialize sandbox");
-        }
-      } catch (error) {
-        console.error("Error initializing sandbox:", error);
-      }
-    },
-  });
-
+export default function Chat({ messages, setMessages, isLoading, submit }: ChatProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     // Later we can have a new set that is the input inside of the from and when submit is pressed we can add that to the messages
     e.preventDefault();
@@ -49,7 +24,6 @@ export default function Chat({ botId }: { botId: string }) {
     const prompt = formData.get("prompt") as string;
     setMessages([...messages, { content: prompt }]);
     submit({ prompt });
-    console.log(messages);
   }
 
   return (

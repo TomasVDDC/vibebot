@@ -9,6 +9,7 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { prompt } = await req.json();
   const completePrompt = promptStart + prompt;
+  console.log("This is the final prompt\n", completePrompt);
 
   try {
     const result = streamObject({
