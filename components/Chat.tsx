@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
 import { LoaderIcon } from "lucide-react";
 import { ArrowUp } from "lucide-react";
+import { useRef, useEffect } from "react";
 
 interface ChatProps {
   messages: Message[];
@@ -25,6 +26,17 @@ export default function Chat({ messages, setMessages, isLoading, submit }: ChatP
     setMessages([...messages, { content: prompt }]);
     submit({ prompt });
   }
+  const container = useRef<HTMLDivElement>(null);
+
+  const Scroll = () => {
+    if (container.current) {
+      container.current.scrollTop = container.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    Scroll();
+  }, [messages]);
 
   return (
     <Card className="border-none shadow-none w-[700px]">
@@ -32,7 +44,7 @@ export default function Chat({ messages, setMessages, isLoading, submit }: ChatP
         <CardTitle></CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-2">
+        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-2" ref={container}>
           {messages.map((message, index) => (
             <div
               key={index}
@@ -75,7 +87,7 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
 
   return (
     <Form {...form}>
-      <form className="space-y-8 border-2 rounded-2xl" onSubmit={onSubmit}>
+      <form className="space-y-8 border-2 mt-2 rounded-2xl" onSubmit={onSubmit}>
         <FormField
           control={form.control}
           name="prompt"
