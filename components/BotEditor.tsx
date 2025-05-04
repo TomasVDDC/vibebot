@@ -5,9 +5,22 @@ import { answerSchema } from "@/app/api/chat/answer-schema";
 import { useState } from "react";
 import { Message } from "@/lib/messages";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
+import { useMutation } from "@tanstack/react-query";
 
 export default function BotEditor({ botId }: { botId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
+
+  const mutation = useMutation({
+    mutationFn: async ({ botId, code }: { botId: string; code?: string }) =>
+      await fetch("/api/sandbox", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ botId, code }),
+      }),
+    onSuccess: () => {},
+  });
 
   const { submit, isLoading } = useObject({
     // When the submit function is called, it will call the /api/chat endpoint
@@ -17,21 +30,22 @@ export default function BotEditor({ botId }: { botId: string }) {
     onFinish: async ({ object }) => {
       setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "" }]);
 
-      try {
-        const response = await fetch("/api/sandbox", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ botId, code: object?.code }),
-        });
+      //   try {
+      //     const response = await fetch("/api/sandbox", {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({ botId, code: object?.code }),
+      //     });
 
-        if (!response.ok) {
-          console.error("Failed to initialize sandbox");
-        }
-      } catch (error) {
-        console.error("Error initializing sandbox:", error);
-      }
+      //     if (!response.ok) {
+      //       console.error("Failed to initialize sandbox");
+      //     }
+      //   } catch (error) {
+      //     console.error("Error initializing sandbox:", error);
+      //   }
+      mutation.mutate({ botId, code: object?.code });
     },
   });
   return (

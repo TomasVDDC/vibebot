@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+
 // import { Montserrat } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
 
 // const DMSans = Montserrat({
 //   variable: "--font-dm-sans",
@@ -20,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <Providers>
       <html lang="en">
         <body> {children} </body>
         {/* <body className={`${DMSans.variable} antialiased`}>{children}</body> */}
       </html>
-    </ClerkProvider>
+    </Providers>
   );
 }

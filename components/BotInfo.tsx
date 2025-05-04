@@ -1,24 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BotCommands } from "@/lib/bots";
-import { useEffect, useState } from "react";
 import { getBotCommands, getBotDescription } from "@/app/actions/actions";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { useQuery } from "@tanstack/react-query";
 export default function BotInfo({ botId, isLoading }: { botId: string; isLoading: boolean }) {
-  const [botCommands, setBotCommands] = useState<BotCommands[]>([]);
-  const [botDescription, setBotDescription] = useState<string>("");
-  useEffect(() => {
-    const updateBotCommands = async () => {
-      const botCommands = await getBotCommands(botId);
-      setBotCommands(botCommands);
-    };
-    const updateBotDescription = async () => {
-      const botDescription = await getBotDescription(botId);
-      setBotDescription(botDescription);
-    };
-    updateBotCommands();
-    updateBotDescription();
-  }, [botId]);
+  const { data: botCommands } = useQuery({
+    queryKey: ["botCommands", botId],
+    queryFn: () => getBotCommands(botId),
+  });
+  const { data: botDescription } = useQuery({
+    queryKey: ["botDescription", botId],
+    queryFn: () => getBotDescription(botId),
+  });
 
   return (
     <>
