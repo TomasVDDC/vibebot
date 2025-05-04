@@ -17,7 +17,7 @@ export default function InputBar() {
     }, animationDuration);
 
     return () => clearInterval(interval);
-  }, []);
+  });
 
   return (
     <div className="rounded-4xl shadow-2xl border-2 border-primary w-[700px] p-2">

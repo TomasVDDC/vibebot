@@ -2,14 +2,16 @@ import BotHeader from "@/components/BotHeader";
 import { Separator } from "@/components/ui/separator";
 import BotEditor from "@/components/BotEditor";
 
-export default async function BuildBot({ params }: { params: { id: string } }) {
-  const botId = params.id;
+export default async function BuildBot({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  console.log(id);
 
   return (
     <div className="p-4">
-      <BotHeader botId={botId} />
+      <BotHeader botId={id} />
       <Separator />
-      <BotEditor botId={botId} />
+      <BotEditor botId={id} />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function BotEditor({ botId }: { botId: string }) {
     },
   });
   return (
-    <div className="grid grid-cols-[1fr_300px] gap-4">
+    <div className="grid grid-cols-[1fr_1fr] gap-4">
       <Chat messages={messages} setMessages={setMessages} isLoading={isLoading} submit={submit} />
       <div className="h-screen overflow-y-auto">
         <BotInfo botId={botId} isLoading={isLoading} />
