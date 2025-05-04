@@ -128,3 +128,19 @@ export async function getBotCommands(botId: string) {
   console.log("botCommands", botCommands);
   return botCommands.result;
 }
+
+// Get bot description
+export async function getBotDescription(botId: string) {
+  const bots = await getBotsDB();
+  const bot = bots.find((bot) => bot.botId === Number(botId));
+  if (!bot) {
+    throw new Error("Bot not found");
+  }
+  const response = await fetch(`https://api.telegram.org/bot${bot.botToken}/getMyDescription`);
+  if (!response.ok) {
+    throw new Error("Failed to get bot description");
+  }
+  const botDescription = await response.json();
+  console.log("botDescription", botDescription);
+  return botDescription.result.description;
+}
