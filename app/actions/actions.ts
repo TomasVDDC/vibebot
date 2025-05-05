@@ -1,9 +1,10 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { botsTable } from "@/app/db/schema";
+import { botsTable, chatMessagesTable } from "@/app/db/schema";
 import db from "@/app/db";
-import { eq } from "drizzle-orm";
+import { eq, sql, asc } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { Message } from "@/lib/messages";
 
 // ----------------------- BOT ACTIONS -----------------------
 
@@ -143,4 +144,46 @@ export async function getBotDescription(botId: string) {
   const botDescription = await response.json();
   console.log("botDescription", botDescription);
   return botDescription.result.description;
+}
+
+// ----------------------- CHAT ACTIONS -----------------------
+
+async function getNextMessageOrder(botId: number): Promise<number> {
+  const result = await db
+    .select({
+      maxOrder: sql<number | null>`MAX(${chatMessagesTable.messageOrder})`,
+    })
+    .from(chatMessagesTable)
+    .where(eq(chatMessagesTable.botId, botId));
+
+  return (result[0].maxOrder ?? 0) + 1;
+}
+
+export async function addChatMessage(botId: string, role: string, content: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to add a chat message");
+  }
+
+  try {
+    const messageOrder = await getNextMessageOrder(Number(botId));
+    await db.insert(chatMessagesTable).values({ botId: Number(botId), role, content, messageOrder });
+  } catch (error) {
+    console.error("Failed to add chat message:", error);
+  }
+}
+
+export async function getChatHistory(botId: string): Promise<Message[]> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to get chat history");
+  }
+  return db
+    .select({
+      role: chatMessagesTable.role,
+      content: chatMessagesTable.content,
+    })
+    .from(chatMessagesTable)
+    .where(eq(chatMessagesTable.botId, Number(botId)))
+    .orderBy(asc(chatMessagesTable.messageOrder));
 }

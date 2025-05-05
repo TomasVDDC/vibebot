@@ -1,4 +1,4 @@
-import { bigint, pgTable, varchar } from "drizzle-orm/pg-core";
+import { bigint, integer, pgTable, varchar, text } from "drizzle-orm/pg-core";
 
 import { timestamp } from "drizzle-orm/pg-core";
 
@@ -18,4 +18,15 @@ export const botsTable = pgTable("bots", {
   telegramBotId: bigint({ mode: "number" }).unique().notNull(),
   botToken: varchar({ length: 255 }).unique().notNull(),
   createdAt: timestamp().defaultNow().notNull(),
+});
+
+export const chatMessagesTable = pgTable("chat_messages", {
+  messageId: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  botId: bigint({ mode: "number" })
+    .notNull()
+    .references(() => botsTable.botId, { onDelete: "cascade" }),
+  role: varchar({ length: 50 }).notNull(), // e.g., "user" or "assistant"
+  content: text().notNull(), // Message content
+  messageOrder: integer().notNull(), // To maintain the order of messages
+  createdAt: timestamp().defaultNow().notNull(), // When the message was created
 });
