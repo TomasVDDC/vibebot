@@ -23,7 +23,7 @@ export default function Chat({ messages, setMessages, isLoading, submit }: ChatP
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const prompt = formData.get("prompt") as string;
-    setMessages([...messages, { content: prompt }]);
+    setMessages([...messages, { content: prompt, role: "user" }]);
     submit({ prompt });
   }
   const container = useRef<HTMLDivElement>(null);
@@ -48,7 +48,7 @@ export default function Chat({ messages, setMessages, isLoading, submit }: ChatP
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`p-3 rounded-lg ${index % 2 === 0 ? "bg-primary/10 ml-auto max-w-[80%]" : "bg-secondary/20 mr-auto max-w-[80%]"}`}
+              className={`p-3 rounded-lg ${message.role === "user" ? "bg-primary/10 ml-auto max-w-[80%]" : "bg-secondary/20 mr-auto max-w-[80%]"}`}
             >
               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
             </div>
@@ -87,7 +87,7 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
 
   return (
     <Form {...form}>
-      <form className="space-y-8 border-2 mt-2 rounded-2xl" onSubmit={onSubmit}>
+      <form className="space-y-8 border-2 mt-2 rounded-2xl shadow-xl border-primary" onSubmit={onSubmit}>
         <FormField
           control={form.control}
           name="prompt"
@@ -95,7 +95,7 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
             <FormItem className="border-none m-2">
               <FormControl>
                 <Input
-                  className="border-none shadow-none [&::placeholder]:text-lg focus-visible:ring-0 focus:outline-none"
+                  className="border-none shadow-none [&::placeholder]:text-lg [&::placeholder]:text-primary focus-visible:ring-0 focus:outline-none"
                   placeholder="Describe your bot..."
                   {...field}
                 />

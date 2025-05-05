@@ -48,7 +48,7 @@ export default function BotEditor({ botId }: { botId: string }) {
     schema: answerSchema,
     // The response from the /api/chat endpoint will be the object
     onFinish: async ({ object }) => {
-      setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "" }]);
+      setMessages((prevMessages) => [...prevMessages, { content: object?.commentary ?? "", role: "assistant" }]);
       mutate({ botId, code: object?.code });
     },
   });

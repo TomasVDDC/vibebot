@@ -15,9 +15,9 @@ export default function BotInfo({
   return (
     <>
       {/* Bot Description Card */}
-      <Card className="max-w-md min-w-[300px] mx-auto mt-6">
+      <Card className="max-w-md min-w-[300px] mx-auto mt-6 shadow-xl border-primary">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">Bot Description</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-primary">Bot Description</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {!botDescription ? (
@@ -28,9 +28,9 @@ export default function BotInfo({
         </CardContent>
       </Card>
       {/* Bot Commands Card */}
-      <Card className="max-w-md min-w-[300px] mx-auto mt-6">
+      <Card className="max-w-md min-w-[300px] mx-auto mt-6 shadow-xl border-primary">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">Bot Commands</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-primary">Bot Commands</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {isBotCommandsLoading ? (
