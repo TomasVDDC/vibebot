@@ -18,14 +18,14 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center min-h-[800px]">
-        <h1 className="max-w-[800px] text-6xl font-bold text-center text-shadow-lg">
+      <div className="flex flex-col justify-center items-center min-h-[600px] sm:min-h-[800px]">
+        <h1 className=" max-w-[300px] text-4xl sm:max-w-[800px] sm:text-6xl font-bold text-center text-shadow-lg">
           Turn Ideas into <span className="text-primary">Telegram Bots</span> Instantly with AI
         </h1>
         <p className="mt-4 max-w-[800px]text-2xl text-center text-shadow-lg">
           Chat with our AI to design your Telegram bot — no coding, just conversation.
         </p>
-        <div className="flex flex-row items-center justify-center gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
           <InputBar />
           <SignInButton>
             <Button className="px-4 py-2 rounded-md cursor-pointer bg-primary shadow-lg ">Get Started</Button>
