@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { getBotInfo } from "@/app/actions/actions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import DeleteBotButton from "./DeleteBotButton";
 
 export default async function BotHeader({ botId }: { botId: string }) {
   const bot = await getBotInfo(botId);
@@ -39,6 +40,8 @@ export default async function BotHeader({ botId }: { botId: string }) {
             Open in Telegram
           </a>
         </Button>
+
+        <DeleteBotButton botId={botId} />
       </div>
     </div>
   );
