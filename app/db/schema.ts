@@ -30,3 +30,14 @@ export const chatMessagesTable = pgTable("chat_messages", {
   messageOrder: integer().notNull(), // To maintain the order of messages
   createdAt: timestamp().defaultNow().notNull(), // When the message was created
 });
+
+export const botCodeTable = pgTable("bot_code", {
+  codeId: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  botId: bigint({ mode: "number" })
+    .notNull()
+    .references(() => botsTable.botId, { onDelete: "cascade" }),
+  // Link to assistant's message, if the message is deleted then, the messageId will be set to null, code entries remain if the message is deleted.
+  messageId: bigint({ mode: "number" }).references(() => chatMessagesTable.messageId, { onDelete: "set null" }),
+  code: text().notNull(), // Generated code
+  createdAt: timestamp().defaultNow().notNull(),
+});

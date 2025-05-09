@@ -1,8 +1,8 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { botsTable, chatMessagesTable } from "@/app/db/schema";
+import { botsTable, chatMessagesTable, botCodeTable } from "@/app/db/schema";
 import db from "@/app/db";
-import { eq, sql, asc } from "drizzle-orm";
+import { eq, sql, asc, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Message } from "@/lib/messages";
 
@@ -41,6 +41,20 @@ export async function addBot(
     return { message: "Failed to add bot to database" };
   }
   redirect(`/home/${botId[0].botId}`);
+}
+
+export async function deleteBot(botId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to delete a bot");
+  }
+  try {
+    await db.delete(botsTable).where(eq(botsTable.botId, Number(botId)));
+  } catch (error) {
+    console.error("Failed to delete bot:", error);
+    throw new Error("Failed to delete bot");
+  }
+  redirect("/home");
 }
 
 export async function getBotsDB() {
@@ -126,7 +140,6 @@ export async function getBotCommands(botId: string) {
     throw new Error("Failed to get bot commands");
   }
   const botCommands = await response.json();
-  console.log("botCommands", botCommands);
   return botCommands.result;
 }
 
@@ -142,7 +155,6 @@ export async function getBotDescription(botId: string) {
     throw new Error("Failed to get bot description");
   }
   const botDescription = await response.json();
-  console.log("botDescription", botDescription);
   return botDescription.result.description;
 }
 
@@ -164,13 +176,18 @@ export async function addChatMessage(botId: string, role: string, content: strin
   if (!userId) {
     throw new Error("You must be signed in to add a chat message");
   }
-
+  let messageId;
   try {
     const messageOrder = await getNextMessageOrder(Number(botId));
-    await db.insert(chatMessagesTable).values({ botId: Number(botId), role, content, messageOrder });
+    const message = await db
+      .insert(chatMessagesTable)
+      .values({ botId: Number(botId), role, content, messageOrder })
+      .returning({ messageId: chatMessagesTable.messageId });
+    messageId = message[0].messageId;
   } catch (error) {
     console.error("Failed to add chat message:", error);
   }
+  return messageId!;
 }
 
 export async function getChatHistory(botId: string): Promise<Message[]> {
@@ -186,4 +203,29 @@ export async function getChatHistory(botId: string): Promise<Message[]> {
     .from(chatMessagesTable)
     .where(eq(chatMessagesTable.botId, Number(botId)))
     .orderBy(asc(chatMessagesTable.messageOrder));
+}
+
+// ----------------------- BOTCODE ACTIONS -----------------------
+
+export async function addBotCode(botId: string, messageId: number, code: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to add a bot code");
+  }
+  await db.insert(botCodeTable).values({ botId: Number(botId), messageId: messageId ?? null, code });
+}
+
+export async function getLatestBotCode(botId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to get a bot code");
+  }
+
+  const botCode = await db
+    .select({ code: botCodeTable.code })
+    .from(botCodeTable)
+    .where(eq(botCodeTable.botId, Number(botId)))
+    .orderBy(desc(botCodeTable.createdAt))
+    .limit(1);
+  return botCode[0]?.code ?? "";
 }

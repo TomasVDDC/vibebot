@@ -14,15 +14,20 @@ interface ChatProps {
   addMessage: (message: Message) => void;
   isLoading: boolean;
   submit: (prompt: { prompt: string }) => void;
+  latestBotCode: string;
 }
 
-export default function Chat({ messages, addMessage, isLoading, submit }: ChatProps) {
+export default function Chat({ messages, addMessage, isLoading, submit, latestBotCode }: ChatProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     // Later we can have a new set that is the input inside of the from and when submit is pressed we can add that to the messages
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const prompt = formData.get("prompt") as string;
+    let prompt = formData.get("prompt") as string;
+
     addMessage({ content: prompt, role: "user" });
+    console.log("latestBotCode", latestBotCode);
+    prompt = latestBotCode + prompt;
+    console.log("prompt", prompt);
     submit({ prompt });
   }
   const container = useRef<HTMLDivElement>(null);
