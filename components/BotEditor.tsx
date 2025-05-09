@@ -5,7 +5,15 @@ import { answerSchema } from "@/app/api/chat/answer-schema";
 import { Message } from "@/lib/messages";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getBotCommands, getBotDescription, addChatMessage, getChatHistory, addBotCode, getLatestBotCode } from "@/app/actions/actions";
+import {
+  getBotCommands,
+  getBotDescription,
+  addChatMessage,
+  getChatHistory,
+  addBotCode,
+  getLatestBotCode,
+  getSandboxStatus,
+} from "@/app/actions/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
@@ -36,14 +44,21 @@ export default function BotEditor({ botId }: { botId: string }) {
     queryFn: () => getLatestBotCode(botId),
   });
 
-  const { isPending: isSandboxRunning, mutate: sendCodeToSandbox } = useMutation({
+  // Polling the sandbox status
+  const { data: sandboxStatus } = useQuery({
+    queryKey: ["sandboxStatus", botId],
+    queryFn: () => getSandboxStatus(botId),
+    refetchInterval: 5000,
+  });
+
+  const { mutate: sendCodeToSandbox, isPending: isSandboxBootingUp } = useMutation({
     mutationFn: async ({ botId, code }: { botId: string; code?: string }) => {
       // After 10 seconds, the botcommands will be refetched, this should really be a webhook. The server should send a message to the client when the code on the sandbox is executed.
       setTimeout(() => {
         console.log("invalidating botCommands");
         queryClient.invalidateQueries({ queryKey: ["botCommands", botId] });
         queryClient.invalidateQueries({ queryKey: ["botDescription", botId] });
-      }, 3000); // 3 seconds
+      }, 2000);
 
       const response = await fetch("/api/sandbox", {
         method: "POST",
@@ -55,10 +70,9 @@ export default function BotEditor({ botId }: { botId: string }) {
 
       return response.json();
     },
-    // onSettled: (data) => {
-    //   console.log("Sandbox response data:", JSON.stringify(data, null, 2));
-    //   // Sandbox needs to be restarted after it times out.
-    // },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["sandboxStatus", botId] });
+    },
   });
 
   const { mutateAsync: addMessage } = useMutation({
@@ -78,7 +92,7 @@ export default function BotEditor({ botId }: { botId: string }) {
     schema: answerSchema,
     // The response from the /api/chat endpoint will be the object
     onFinish: async ({ object }) => {
-      console.log("object", object);
+      console.log("Response from /api/chat", object);
       const messageId = await addMessage({ content: object?.commentary ?? "", role: "assistant" });
       // We associate the code with a specific messageId, if the message is deleted, the messageId will be set to null, but the code entries remain.
 
@@ -101,7 +115,7 @@ export default function BotEditor({ botId }: { botId: string }) {
 
   return (
     <div className="grid grid-cols-[1fr_1fr] gap-4">
-      {isSandboxRunning ? (
+      {sandboxStatus?.status === "running" ? (
         <Chat messages={messages} addMessage={addMessage} isLoading={isLoading} submit={submit} latestBotCode={latestBotCode ?? ""} />
       ) : (
         <Card className="mt-6 mx-auto h-[300px] w-[400px] shadow-2xl  border-2 border-muted-foreground/10">
@@ -112,7 +126,7 @@ export default function BotEditor({ botId }: { botId: string }) {
           </CardHeader>
           <CardContent className="flex flex-col items-center pb-8">
             <Button className="mt-2 w-40 px-6 py-2 text-base font-semibold cursor-pointer" onClick={() => handleStartSandbox()} variant="default">
-              {isLoading ? <Loader2 className="animate-spin" /> : "Start Sandbox"}
+              {isLoading || isSandboxBootingUp ? <Loader2 className="animate-spin" /> : "Start Sandbox"}
             </Button>
           </CardContent>
         </Card>

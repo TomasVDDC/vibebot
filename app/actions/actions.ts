@@ -5,6 +5,7 @@ import db from "@/app/db";
 import { eq, sql, asc, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Message } from "@/lib/messages";
+import { Sandbox } from "@e2b/code-interpreter";
 
 // ----------------------- BOT ACTIONS -----------------------
 
@@ -228,4 +229,23 @@ export async function getLatestBotCode(botId: string) {
     .orderBy(desc(botCodeTable.createdAt))
     .limit(1);
   return botCode[0]?.code ?? "";
+}
+
+// ----------------------- SANDBOX ACTIONS -----------------------
+
+export async function getSandboxStatus(botId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to get the sandbox status");
+  }
+
+  const runningSandboxes = await Sandbox.list();
+  console.log("runningSandboxes", runningSandboxes);
+
+  const sbx = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
+  console.log("sbx", sbx);
+  if (!sbx) {
+    return { status: "not running" };
+  }
+  return { status: "running" };
 }

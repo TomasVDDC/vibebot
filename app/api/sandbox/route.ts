@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   }
 
   await sbx.commands.run("node bot-template-code.js", {
-    //background: true, // run the command in the background, will return immediately and command will continue to run in the sandbox
+    background: true, // run the command in the background, will return immediately and command will continue to run in the sandbox
     envs: { WEBHOOK_DOMAIN: domain },
     onStdout: (data) => console.log("stdout:", data),
     onStderr: (data) => console.error("stderr:", data),
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   });
 
   // Return a success response, always success seems strange
-  return new Response(JSON.stringify({ success: true, sandboxId: sbx.sandboxId }), {
+  return new Response(JSON.stringify({ success: true }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",
