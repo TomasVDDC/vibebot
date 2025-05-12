@@ -10,14 +10,15 @@ import { LoaderIcon } from "lucide-react";
 import { ArrowUp } from "lucide-react";
 import { useRef, useEffect } from "react";
 interface ChatProps {
+  botId: string;
   messages: Message[];
   addMessage: (message: Message) => void;
   isLoading: boolean;
-  submit: (prompt: { prompt: string }) => void;
+  submit: (prompt: { prompt: string; botId: string }) => void;
   latestBotCode: string;
 }
 
-export default function Chat({ messages, addMessage, isLoading, submit, latestBotCode }: ChatProps) {
+export default function Chat({ messages, addMessage, isLoading, submit, latestBotCode, botId }: ChatProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     // Later we can have a new set that is the input inside of the from and when submit is pressed we can add that to the messages
     e.preventDefault();
@@ -28,7 +29,7 @@ export default function Chat({ messages, addMessage, isLoading, submit, latestBo
     console.log("latestBotCode", latestBotCode);
     prompt = latestBotCode + prompt;
     console.log("prompt", prompt);
-    submit({ prompt });
+    submit({ prompt, botId });
   }
   const container = useRef<HTMLDivElement>(null);
 

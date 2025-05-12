@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { getBotInfo } from "@/app/actions/actions";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import DeployBotButton from "./DeployBotButton";
 import DeleteBotButton from "./DeleteBotButton";
 
 export default async function BotHeader({ botId }: { botId: string }) {
@@ -23,16 +23,7 @@ export default async function BotHeader({ botId }: { botId: string }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button className="cursor-not-allowed">Deploy</Button>
-            </TooltipTrigger>
-            <TooltipContent sideOffset={10}>
-              <p>Deploy your bot to the public (Work in progress)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <DeployBotButton botId={botId} />
 
         <Button variant="default" asChild>
           <a href={`https://t.me/${bot.username}`} target="_blank" rel="noopener noreferrer">

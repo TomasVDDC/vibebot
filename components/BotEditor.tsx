@@ -55,7 +55,6 @@ export default function BotEditor({ botId }: { botId: string }) {
     mutationFn: async ({ botId, code }: { botId: string; code?: string }) => {
       // After 10 seconds, the botcommands will be refetched, this should really be a webhook. The server should send a message to the client when the code on the sandbox is executed.
       setTimeout(() => {
-        console.log("invalidating botCommands");
         queryClient.invalidateQueries({ queryKey: ["botCommands", botId] });
         queryClient.invalidateQueries({ queryKey: ["botDescription", botId] });
       }, 2000);
@@ -108,7 +107,7 @@ export default function BotEditor({ botId }: { botId: string }) {
       sendCodeToSandbox({ botId, code: latestBotCode });
     } else {
       const prompt = "Please write a simple bot that says hello";
-      submit({ prompt, useInitialCodeTemplate: true });
+      submit({ prompt, useInitialCodeTemplate: true, botId });
       addMessage({ content: prompt, role: "user" });
     }
   };
@@ -116,7 +115,7 @@ export default function BotEditor({ botId }: { botId: string }) {
   return (
     <div className="grid grid-cols-[1fr_1fr] gap-4">
       {sandboxStatus?.status === "running" ? (
-        <Chat messages={messages} addMessage={addMessage} isLoading={isLoading} submit={submit} latestBotCode={latestBotCode ?? ""} />
+        <Chat messages={messages} addMessage={addMessage} isLoading={isLoading} submit={submit} latestBotCode={latestBotCode ?? ""} botId={botId} />
       ) : (
         <Card className="mt-6 mx-auto h-[300px] w-[400px] shadow-2xl  border-2 border-muted-foreground/10">
           <CardHeader className="flex flex-col items-center justify-center gap-2 pt-8 pb-2">

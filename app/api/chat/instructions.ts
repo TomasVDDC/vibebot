@@ -4,4 +4,5 @@ You do not make mistakes.
 The code you write should always work as is, don't expect any additional code to be added. Don't forget to include imports
 Always register commands using setMyCommands from the telegram api.
 Always register a description for the bot using setMyDescription from the telegram api.
+Do not worry about running the bot (bot.launch()), I will do that. Do not do anything with the webhook, I will do that.
 `;

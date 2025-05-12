@@ -92,7 +92,6 @@ export async function getBotsInfo() {
       };
     })
   );
-  console.log(botsInfo);
   return botsInfo;
 }
 
@@ -228,6 +227,7 @@ export async function getLatestBotCode(botId: string) {
     .where(eq(botCodeTable.botId, Number(botId)))
     .orderBy(desc(botCodeTable.createdAt))
     .limit(1);
+
   return botCode[0]?.code ?? "";
 }
 
@@ -240,12 +240,75 @@ export async function getSandboxStatus(botId: string) {
   }
 
   const runningSandboxes = await Sandbox.list();
-  console.log("runningSandboxes", runningSandboxes);
 
   const sbx = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
-  console.log("sbx", sbx);
+
   if (!sbx) {
     return { status: "not running" };
   }
   return { status: "running" };
+}
+
+// ----------------------- DEPLOY ACTIONS -----------------------
+
+export async function deployBot(botId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to deploy a bot");
+  }
+
+  const headersGithub = {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${process.env.GITHUB_PAT}`,
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+
+  const headersRender = {
+    Accept: "application/json",
+    Authorization: `Bearer ${process.env.RENDER_PAT}`,
+  };
+
+  const renderEnvGroupId = process.env.RENDER_ENV_GROUP_ID;
+
+  const code = await getLatestBotCode(botId);
+  const botToken = await getBotToken(botId);
+
+  async function writeNewBotToGithub(botId: string, code: string) {
+    const base64Code = Buffer.from(code).toString("base64");
+
+    //sha ensures that we are updating the correct version of the file
+    const responseSha = await fetch(process.env.GITHUB_REPO_URL + `bot-id-${botId}.js`, {
+      method: "GET",
+      headers: headersGithub,
+    });
+    const data = await responseSha.json();
+    const sha = data.sha;
+
+    const responseGithub = await fetch(process.env.GITHUB_REPO_URL + `bot-id-${botId}.js`, {
+      method: "PUT",
+      headers: headersGithub,
+      body: JSON.stringify({ message: "new bot", content: base64Code, sha }),
+    });
+    if (!responseGithub.ok) {
+      console.error(`[ERROR] Failed to write new bot to GitHub: ${responseGithub.statusText}`);
+      throw new Error("Failed to write new bot to GitHub");
+    }
+    console.log(`[INFO] Successfully wrote ${botId} to github`);
+  }
+
+  async function addNewEnvVarToRender(envVarName: string, envVarValue: string) {
+    const responseRender = await fetch(`https://api.render.com/v1/env-groups/${renderEnvGroupId}/env-vars/${envVarName}`, {
+      method: "PUT",
+      headers: headersRender,
+      body: JSON.stringify({ value: envVarValue }),
+    });
+    if (!responseRender.ok) {
+      console.error(`[ERROR] Failed to add new env var to Render: ${responseRender.statusText}`);
+      throw new Error("Failed to add new env var to Render");
+    }
+    console.log(`[INFO] Successfully added ${envVarName} to render`);
+  }
+  // The bot token will probably be pulled from a db in the future
+  addNewEnvVarToRender(`BOT_TOKEN_${botId}`, botToken);
+  writeNewBotToGithub(botId, code);
 }
