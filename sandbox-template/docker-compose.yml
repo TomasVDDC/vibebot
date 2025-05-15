@@ -6,7 +6,6 @@ services:
     image: sandbox-template:latest
     container_name: sandbox-template
     ports:
-      - "3000:3000" # Next.js
       - "4983:4983" # Additional port
       - "8080:8080" # VS Code server
 

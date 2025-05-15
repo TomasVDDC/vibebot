@@ -243,6 +243,29 @@ export async function getSandboxStatus(botId: string) {
 
   const sbx = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
 
+  // For debugging purposes, we can log the contents of the sandbox
+  // if (sbx) {
+  //   const sbx_temp = await Sandbox.connect(sbx.sandboxId);
+  //   await sbx_temp.commands.run("ls -la", {
+  //     background: true,
+  //     onStdout: (data) => console.log("stdout:", data),
+  //     onStderr: (data) => console.error("stderr:", data),
+  //     timeoutMs: 10000,
+  //   });
+  //   await sbx_temp.commands.run("cat claude.log", {
+  //     background: true,
+  //     onStdout: (data) => console.log("stdout:", data),
+  //     onStderr: (data) => console.error("stderr:", data),
+  //     timeoutMs: 10000,
+  //   });
+  //   await sbx_temp.commands.run("ls -la ..", {
+  //     background: true,
+  //     onStdout: (data) => console.log("stdout:", data),
+  //     onStderr: (data) => console.error("stderr:", data),
+  //     timeoutMs: 10000,
+  //   });
+  // }
+
   if (!sbx) {
     return { status: "not running" };
   }

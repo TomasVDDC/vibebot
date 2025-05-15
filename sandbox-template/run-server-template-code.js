@@ -1,4 +1,4 @@
-import bot from "./bot-template-code.js";
+import bot from "./bot.js";
 import { createServer } from "http";
 import dotenv from "dotenv";
 dotenv.config();
