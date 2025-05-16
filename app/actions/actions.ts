@@ -241,35 +241,97 @@ export async function getSandboxStatus(botId: string) {
 
   const runningSandboxes = await Sandbox.list();
 
-  const sbx = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
+  const sbxInfo = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
 
   // For debugging purposes, we can log the contents of the sandbox
-  // if (sbx) {
-  //   const sbx_temp = await Sandbox.connect(sbx.sandboxId);
-  //   await sbx_temp.commands.run("ls -la", {
-  //     background: true,
-  //     onStdout: (data) => console.log("stdout:", data),
-  //     onStderr: (data) => console.error("stderr:", data),
-  //     timeoutMs: 10000,
-  //   });
-  //   await sbx_temp.commands.run("cat claude.log", {
-  //     background: true,
-  //     onStdout: (data) => console.log("stdout:", data),
-  //     onStderr: (data) => console.error("stderr:", data),
-  //     timeoutMs: 10000,
-  //   });
-  //   await sbx_temp.commands.run("ls -la ..", {
-  //     background: true,
-  //     onStdout: (data) => console.log("stdout:", data),
-  //     onStderr: (data) => console.error("stderr:", data),
-  //     timeoutMs: 10000,
-  //   });
-  // }
+  if (sbxInfo) {
+    const sbx_temp = await Sandbox.connect(sbxInfo.sandboxId);
+    // await sbx_temp.commands.run("ls -la", {
+    //   background: true,
+    //   onStdout: (data) => console.log("stdout:", data),
+    //   onStderr: (data) => console.error("stderr:", data),
+    //   timeoutMs: 10000,
+    // });
+    // await sbx_temp.commands.run("cat claude.log", {
+    //   background: true,
+    //   onStdout: (data) => console.log("stdout:", data),
+    //   onStderr: (data) => console.error("stderr:", data),
+    //   timeoutMs: 10000,
+    // });
+    // await sbx_temp.commands.run("ls -la ..", {
+    //   background: true,
+    //   onStdout: (data) => console.log("stdout:", data),
+    //   onStderr: (data) => console.error("stderr:", data),
+    //   timeoutMs: 10000,
+    // });
+  }
 
-  if (!sbx) {
+  if (!sbxInfo) {
     return { status: "not running" };
   }
+
   return { status: "running" };
+}
+
+export async function getClaudeCommandStatus(
+  botId: string,
+  lastMessageId: number | null,
+  previousClaudeCommandStatus: { isDone: boolean; hasStarted: boolean; isRunning: boolean }
+) {
+  // Helper function to determine Claude command status
+
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to get the sandbox status");
+  }
+
+  const runningSandboxes = await Sandbox.list();
+
+  const sbxInfo = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
+  if (!sbxInfo) {
+    return { isDone: false, hasStarted: false, isRunning: false };
+  }
+
+  if (previousClaudeCommandStatus && previousClaudeCommandStatus.isDone === true) {
+    console.log("ClaudeCommandStatus: Command has finished");
+    return { isDone: true, hasStarted: true, isRunning: false };
+  }
+
+  const sbx = await Sandbox.connect(sbxInfo.sandboxId);
+  // Method 1: Check if the claude process is still running
+  const commands = await sbx.commands.list();
+  // Check if the Claude command is running
+  const claudeCommandRunning = commands.some((cmd) => {
+    // Check if it's a shell command (-c) that includes 'claude -c -p'
+    if (cmd.args && Array.isArray(cmd.args) && cmd.args.length >= 3) {
+      // The claude command will be in the third argument if using -c flag
+      const shellCommandArg = cmd.args.find((arg) => typeof arg === "string" && arg.includes("claude -c -p"));
+      return !!shellCommandArg;
+    }
+    return false;
+  });
+
+  if (claudeCommandRunning) {
+    console.log("ClaudeCommandStatus: Command is running");
+    return { isDone: false, hasStarted: true, isRunning: true };
+  }
+
+  if (previousClaudeCommandStatus.hasStarted && !claudeCommandRunning) {
+    console.log("ClaudeCommandStatus: Command just finished");
+    // TODO: Add logic to update the bot code
+    const file = await sbx.files.read("bot.js");
+    console.log("ClaudeCommandStatus: File content:", file);
+    if (lastMessageId) {
+      addBotCode(botId, lastMessageId, file);
+    } else {
+      console.log("ClaudeCommandStatus: No message id found, bot code not saved");
+    }
+    return { isDone: true, hasStarted: true, isRunning: false };
+  }
+
+  // Default case: Claude hasn't started yet
+  console.log("ClaudeCommandStatus: Default case");
+  return { isDone: false, hasStarted: false, isRunning: false };
 }
 
 // ----------------------- DEPLOY ACTIONS -----------------------

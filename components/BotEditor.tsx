@@ -13,15 +13,16 @@ import {
   addBotCode,
   getLatestBotCode,
   getSandboxStatus,
+  getClaudeCommandStatus,
 } from "@/app/actions/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Loader2 } from "lucide-react";
-
+import { useState } from "react";
 export default function BotEditor({ botId }: { botId: string }) {
   //const [isSandboxRunning, setIsSandboxRunning] = useState(false);
-  //const [sandboxId, setSandboxId] = useState<string | null>(null);
+  const [lastMessageId, setLastMessageId] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -51,20 +52,45 @@ export default function BotEditor({ botId }: { botId: string }) {
     refetchInterval: 5000,
   });
 
-  const { mutate: sendCodeToSandbox, isPending: isSandboxBootingUp } = useMutation({
-    mutationFn: async ({ botId, code }: { botId: string; code?: string }) => {
-      // After 10 seconds, the botcommands will be refetched, this should really be a webhook. The server should send a message to the client when the code on the sandbox is executed.
+  // Polling the claude command status
+  const { data: claudeCommandStatus } = useQuery({
+    queryKey: ["claudeCommandStatus", botId, lastMessageId],
+    queryFn: (context) => {
+      // Try to get the previous status from the query client
+      const previousStatus = context.client.getQueryData(["claudeCommandStatus", botId, lastMessageId]) as
+        | { isDone: boolean; hasStarted: boolean; isRunning: boolean }
+        | undefined;
+
+      // Provide default values if previousStatus is undefined
+      const status = previousStatus ?? {
+        isDone: false,
+        hasStarted: false,
+        isRunning: false,
+      };
+
+      // Pass the status to your API function
+      return getClaudeCommandStatus(botId, lastMessageId, status);
+    },
+    refetchInterval: 5000,
+  });
+
+  const { mutate: startSandbox, isPending: isSandboxBootingUp } = useMutation({
+    mutationFn: async ({ botId, enhancedPrompt, existingBotCode }: { botId: string; enhancedPrompt?: string; existingBotCode?: string }) => {
+      // After 10 seconds, the botcommands will be refetched, this should really be a webhook.
+      // The server should send a message to the client when the code on the sandbox is executed.
+      // Could also be done when we poll the sandbox status.
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["botCommands", botId] });
         queryClient.invalidateQueries({ queryKey: ["botDescription", botId] });
       }, 2000);
 
+      console.log("STARTING SANDBOX WITH EXISTING BOT CODE", existingBotCode);
       const response = await fetch("/api/sandbox", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ botId, code }),
+        body: JSON.stringify({ botId, enhancedPrompt: enhancedPrompt, existingBotCode: existingBotCode }),
       });
 
       return response.json();
@@ -92,22 +118,24 @@ export default function BotEditor({ botId }: { botId: string }) {
     // The response from the /api/chat endpoint will be the object
     onFinish: async ({ object }) => {
       console.log("Response from /api/chat", object);
-      const messageId = await addMessage({ content: object?.commentary ?? "", role: "assistant" });
+      const messageId = await addMessage({ content: object?.answer ?? "", role: "assistant" });
       // We associate the code with a specific messageId, if the message is deleted, the messageId will be set to null, but the code entries remain.
 
-      addBotCode(botId, messageId, object?.code ?? "");
+      //addBotCode(botId, messageId, object?.code ?? "");
+      console.log("ENHANCED PROMPT", object?.enhancedPrompt);
+      setLastMessageId(messageId);
       queryClient.invalidateQueries({ queryKey: ["latestBotCode", botId] });
-      sendCodeToSandbox({ botId, code: object?.code ?? "" });
+      startSandbox({ botId, enhancedPrompt: object?.enhancedPrompt ?? "" });
     },
   });
 
   const handleStartSandbox = async () => {
-    console.log("latestBotCode in handleStartSandbox", latestBotCode);
     if (latestBotCode) {
-      sendCodeToSandbox({ botId, code: latestBotCode });
+      console.log("Starting sandbox with latest bot code");
+      startSandbox({ botId, existingBotCode: latestBotCode });
     } else {
-      const prompt = "Please write a simple bot that says hello";
-      submit({ prompt, useInitialCodeTemplate: true, botId });
+      const prompt = "Please create a very simple bot that says hello";
+      submit({ prompt });
       addMessage({ content: prompt, role: "user" });
     }
   };

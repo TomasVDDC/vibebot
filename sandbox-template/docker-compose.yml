@@ -6,7 +6,6 @@ services:
     image: sandbox-template:latest
     container_name: sandbox-template
     ports:
-      - "4983:4983" # Additional port
       - "8080:8080" # VS Code server
 
     command: tail -f /dev/null
