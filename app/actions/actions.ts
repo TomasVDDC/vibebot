@@ -2,10 +2,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { botsTable, chatMessagesTable, botCodeTable } from "@/app/db/schema";
 import db from "@/app/db";
-import { eq, sql, asc, desc } from "drizzle-orm";
+import { eq, sql, asc, desc, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Message } from "@/lib/messages";
 import { Sandbox } from "@e2b/code-interpreter";
+import { z } from "zod";
 
 // ----------------------- BOT ACTIONS -----------------------
 
@@ -205,14 +206,42 @@ export async function getChatHistory(botId: string): Promise<Message[]> {
     .orderBy(asc(chatMessagesTable.messageOrder));
 }
 
+export async function getLatestMessageId(botId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to get the latest message id");
+  }
+  const messageId = await db
+    .select({ messageId: chatMessagesTable.messageId })
+    .from(chatMessagesTable)
+    .where(eq(chatMessagesTable.botId, Number(botId)))
+    .orderBy(desc(chatMessagesTable.messageOrder))
+    .limit(1);
+  return messageId[0]?.messageId ?? null;
+}
+
 // ----------------------- BOTCODE ACTIONS -----------------------
 
-export async function addBotCode(botId: string, messageId: number, code: string) {
+export async function addBotCode(botId: string, code: string) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("You must be signed in to add a bot code");
   }
-  await db.insert(botCodeTable).values({ botId: Number(botId), messageId: messageId ?? null, code });
+  const messageId = await getLatestMessageId(botId);
+  if (messageId) {
+    // Try to update first
+    const result = await db
+      .update(botCodeTable)
+      .set({ code })
+      .where(and(eq(botCodeTable.botId, Number(botId)), eq(botCodeTable.messageId, messageId)));
+    if (result.rowCount === 0) {
+      // No row was updated, insert new
+      await db.insert(botCodeTable).values({ botId: Number(botId), messageId, code });
+    }
+  } else {
+    // No messageId, just insert
+    await db.insert(botCodeTable).values({ botId: Number(botId), messageId: null, code });
+  }
 }
 
 export async function getLatestBotCode(botId: string) {
@@ -243,43 +272,118 @@ export async function getSandboxStatus(botId: string) {
 
   const sbxInfo = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
 
-  // For debugging purposes, we can log the contents of the sandbox
   if (sbxInfo) {
-    const sbx_temp = await Sandbox.connect(sbxInfo.sandboxId);
+    const sbx = await Sandbox.connect(sbxInfo.sandboxId);
     // await sbx_temp.commands.run("ls -la", {
     //   background: true,
     //   onStdout: (data) => console.log("stdout:", data),
     //   onStderr: (data) => console.error("stderr:", data),
     //   timeoutMs: 10000,
     // });
-    // await sbx_temp.commands.run("cat claude.log", {
+    // await sbx.commands.run("cat .claude/todos/*", {
     //   background: true,
-    //   onStdout: (data) => console.log("stdout:", data),
-    //   onStderr: (data) => console.error("stderr:", data),
+    //   onStdout: (data) => console.log("\nPOLLING TODOS:", data),
+    //   onStderr: (data) => console.error("\nPOLLING TODOS ERROR:", data),
     //   timeoutMs: 10000,
     // });
+    // await sbx.commands.run("cat claude.log", {
+    //   background: true,
+    //   onStdout: (data) => {
+    //     const lines = data.split("\n").slice(0, 3).join("\n");
+    //     console.log("\nPOLLING CLAUDE LOG:", lines);
+    //   },
+    //   onStderr: (data) => console.error("\nPOLLING CLAUDE LOG ERROR:", data),
+    //   timeoutMs: 10000,
+    // });
+
+    await sbx.commands.run("cat bot.js", {
+      background: true,
+      onStdout: (data) => {
+        const lines = data.split("\n").slice(0, 3).join("\n");
+        console.log("\nPOLLING BOT.JS:", lines);
+      },
+      onStderr: (data) => console.error("\nPOLLING BOT.JS ERROR:", data),
+      timeoutMs: 10000,
+    });
     // await sbx_temp.commands.run("ls -la ..", {
     //   background: true,
     //   onStdout: (data) => console.log("stdout:", data),
     //   onStderr: (data) => console.error("stderr:", data),
     //   timeoutMs: 10000,
     // });
-  }
 
-  if (!sbxInfo) {
-    return { status: "not running" };
-  }
+    const currentTask = await getCurrentTask(sbx);
 
-  return { status: "running" };
+    // Check if all the tasks are completed then we can save the bot code
+    const allTasksCompleted = currentTask.tasks.length > 0 && currentTask.tasks.every((task) => task.status === "completed");
+    if (allTasksCompleted) {
+      console.log("\nPOLLING: All tasks completed, saving the botcode");
+      const botCode = await sbx.files.read("bot.js");
+      console.log("\nPOLLING: Bot code", botCode);
+      await addBotCode(botId, botCode);
+    }
+
+    return { status: "running", currentTask };
+  } else {
+    return { status: "not running", currentTask: null };
+  }
 }
 
-export async function getClaudeCommandStatus(
-  botId: string,
-  lastMessageId: number | null,
-  previousClaudeCommandStatus: { isDone: boolean; hasStarted: boolean; isRunning: boolean }
-) {
-  // Helper function to determine Claude command status
+const MessageStatusSchema = z.enum(["pending", "completed", "stopped", "in_progress"]);
+type MessageStatus = z.infer<typeof MessageStatusSchema>;
 
+type TasksArray = {
+  task: string;
+  status: MessageStatus;
+}[];
+
+const rawTasksSchema = z.array(
+  z.object({
+    id: z.string(),
+    priority: z.string(),
+    content: z.string(),
+    status: z.string(),
+  })
+);
+
+export async function getCurrentTask(sbx: Sandbox) {
+  console.log("Getting current task");
+
+  const todos_filepaths = await sbx.files.list("/home/user/.claude/todos");
+  console.log("GETTING CURRENT TASK: Todos filepaths", todos_filepaths);
+  if (todos_filepaths.length === 0) {
+    console.log("No todos found");
+    return {
+      success: false,
+      tasks: [],
+    };
+  }
+
+  const rawTasksString = await sbx.files.read(todos_filepaths[0]!.path);
+  const { success, data } = rawTasksSchema.safeParse(JSON.parse(rawTasksString));
+  console.log("GETTING CURRENT TASK: Raw tasks string", rawTasksString);
+  if (!success) {
+    console.log("Error parsing tasks", rawTasksString);
+    return {
+      success: false,
+      tasks: [],
+    };
+  }
+
+  const tasks: TasksArray = data
+    .filter((todo) => MessageStatusSchema.safeParse(todo.status).success)
+    .map((todo) => ({
+      task: todo.content,
+      status: todo.status as MessageStatus,
+    }));
+
+  return {
+    success: true,
+    tasks,
+  };
+}
+
+export async function deleteSandboxTodos(botId: string) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("You must be signed in to get the sandbox status");
@@ -288,50 +392,15 @@ export async function getClaudeCommandStatus(
   const runningSandboxes = await Sandbox.list();
 
   const sbxInfo = runningSandboxes.find((sandbox) => sandbox.metadata?.botId === botId);
-  if (!sbxInfo) {
-    return { isDone: false, hasStarted: false, isRunning: false };
+  console.log("[INFO] DELETING SANDBOX TODOS");
+  if (sbxInfo) {
+    const sbx = await Sandbox.connect(sbxInfo.sandboxId);
+    await sbx.commands.run("rm -f /home/user/.claude/todos/*", {
+      background: true,
+      onStdout: (data) => console.log("stdout:", data),
+      onStderr: (data) => console.error("stderr:", data),
+    });
   }
-
-  if (previousClaudeCommandStatus && previousClaudeCommandStatus.isDone === true) {
-    console.log("ClaudeCommandStatus: Command has finished");
-    return { isDone: true, hasStarted: true, isRunning: false };
-  }
-
-  const sbx = await Sandbox.connect(sbxInfo.sandboxId);
-  // Method 1: Check if the claude process is still running
-  const commands = await sbx.commands.list();
-  // Check if the Claude command is running
-  const claudeCommandRunning = commands.some((cmd) => {
-    // Check if it's a shell command (-c) that includes 'claude -c -p'
-    if (cmd.args && Array.isArray(cmd.args) && cmd.args.length >= 3) {
-      // The claude command will be in the third argument if using -c flag
-      const shellCommandArg = cmd.args.find((arg) => typeof arg === "string" && arg.includes("claude -c -p"));
-      return !!shellCommandArg;
-    }
-    return false;
-  });
-
-  if (claudeCommandRunning) {
-    console.log("ClaudeCommandStatus: Command is running");
-    return { isDone: false, hasStarted: true, isRunning: true };
-  }
-
-  if (previousClaudeCommandStatus.hasStarted && !claudeCommandRunning) {
-    console.log("ClaudeCommandStatus: Command just finished");
-    // TODO: Add logic to update the bot code
-    const file = await sbx.files.read("bot.js");
-    console.log("ClaudeCommandStatus: File content:", file);
-    if (lastMessageId) {
-      addBotCode(botId, lastMessageId, file);
-    } else {
-      console.log("ClaudeCommandStatus: No message id found, bot code not saved");
-    }
-    return { isDone: true, hasStarted: true, isRunning: false };
-  }
-
-  // Default case: Claude hasn't started yet
-  console.log("ClaudeCommandStatus: Default case");
-  return { isDone: false, hasStarted: false, isRunning: false };
 }
 
 // ----------------------- DEPLOY ACTIONS -----------------------

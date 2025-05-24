@@ -9,16 +9,23 @@ import { Button } from "./ui/button";
 import { LoaderIcon } from "lucide-react";
 import { ArrowUp } from "lucide-react";
 import { useRef, useEffect } from "react";
+interface Task {
+  task: string;
+  status: string;
+}
+
 interface ChatProps {
   botId: string;
   messages: Message[];
   addMessage: (message: Message) => void;
-  isLoading: boolean;
   submit: (prompt: { prompt: string; botId: string }) => void;
   latestBotCode: string;
+  currentTasks?: Task[];
+  isGeneratingBot: boolean;
+  isBotRunning: boolean;
 }
 
-export default function Chat({ messages, addMessage, isLoading, submit, botId }: ChatProps) {
+export default function Chat({ messages, addMessage, submit, botId, currentTasks, isGeneratingBot, isBotRunning }: ChatProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     // Later we can have a new set that is the input inside of the from and when submit is pressed we can add that to the messages
     e.preventDefault();
@@ -57,10 +64,45 @@ export default function Chat({ messages, addMessage, isLoading, submit, botId }:
             </div>
           ))}
         </div>
-        {isLoading && (
+        {/* Current Tasks between chat and input */}
+        {currentTasks && currentTasks.length > 0 && (
+          <div className="flex flex-col gap-1 px-2 py-2 my-2 bg-primary/10 rounded-xl shadow-sm w-full text-xs max-w-full">
+            {currentTasks.map((task, idx) => (
+              <div key={idx} className="flex items-center gap-2 px-2 py-1 rounded-lg bg-background border border-primary/30 shadow-sm">
+                <span className="truncate flex-1 text-primary font-medium" title={task.task}>
+                  {task.task}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded text-xs font-semibold ml-1
+                    ${
+                      task.status === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : task.status === "pending"
+                        ? "bg-yellow-50 text-yellow-700"
+                        : task.status === "in_progress"
+                        ? "bg-blue-50 text-blue-700"
+                        : task.status === "stopped"
+                        ? "bg-red-50 text-red-700"
+                        : "bg-gray-50 text-gray-700"
+                    }
+                  `}
+                >
+                  {task.status.replace("_", " ")}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {isGeneratingBot && (
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <LoaderIcon strokeWidth={2} className="animate-spin w-4 h-4" />
             <span>Generating...</span>
+          </div>
+        )}
+        {isBotRunning && (
+          <div className="flex items-center space-x-2 ml-2">
+            <div className="w-2 h-2 rounded-full  bg-green-500 animate-pulse"></div>
+            <span className="text-sm font-medium text-green-600">Running</span>
           </div>
         )}
         <ChatInput handleSubmit={handleSubmit} />
@@ -91,7 +133,7 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
 
   return (
     <Form {...form}>
-      <form className="space-y-8 border-2 mt-2 rounded-2xl shadow-xl border-primary" onSubmit={onSubmit}>
+      <form className="space-y-8 border mt-2 rounded-2xl shadow-xl border-primary" onSubmit={onSubmit}>
         <FormField
           control={form.control}
           name="prompt"
@@ -99,7 +141,7 @@ function ChatInput({ handleSubmit }: { handleSubmit: (e: React.FormEvent<HTMLFor
             <FormItem className="border-none m-2">
               <FormControl>
                 <Input
-                  className="border-none shadow-none [&::placeholder]:text-lg [&::placeholder]:text-primary focus-visible:ring-0 focus:outline-none"
+                  className="border-none shadow-none [&::placeholder]:text-lg [&::placeholder]:text-primary/70 focus-visible:ring-0 focus:outline-none"
                   placeholder="Describe your bot..."
                   {...field}
                 />
