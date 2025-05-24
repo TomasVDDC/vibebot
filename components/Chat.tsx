@@ -60,7 +60,7 @@ export default function Chat({ messages, addMessage, submit, botId, currentTasks
               key={index}
               className={`p-3 rounded-lg ${message.role === "user" ? "bg-primary/10 ml-auto max-w-[80%]" : "bg-secondary/20 mr-auto max-w-[80%]"}`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <p className="text-md whitespace-pre-wrap">{message.content}</p>
             </div>
           ))}
         </div>

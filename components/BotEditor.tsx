@@ -113,8 +113,8 @@ export default function BotEditor({ botId }: { botId: string }) {
   };
 
   return (
-    <div className="grid grid-cols-[1fr_1fr] gap-4">
-      <div className="flex flex-col">
+    <div className="grid grid-cols-[2fr_1fr] gap-4">
+      <div className="flex flex-col items-center  h-screen">
         <Chat
           messages={messages}
           addMessage={addMessage}
@@ -126,7 +126,7 @@ export default function BotEditor({ botId }: { botId: string }) {
           isBotRunning={isBotRunning}
         />
       </div>
-      <div className="h-screen overflow-y-auto">
+      <div className="h-screen overflow-y-auto border-l border-gray-300 bg-gray-50">
         <BotInfo isBotCommandsLoading={isBotCommandsLoading} botDescription={botDescription} botCommands={botCommands} />
       </div>
     </div>

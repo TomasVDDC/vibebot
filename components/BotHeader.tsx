@@ -8,17 +8,17 @@ import DeleteBotButton from "./DeleteBotButton";
 export default async function BotHeader({ botId }: { botId: string }) {
   const bot = await getBotInfo(botId);
   return (
-    <div className="flex flex-col p-5 md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col pb-2 md:flex-row md:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16">
+        <Avatar className="h-12 w-12">
           <AvatarImage src={`/placeholder.svg?height=64&width=64&text=${bot.username.charAt(0).toUpperCase()}`} />
           <AvatarFallback>{bot.username.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{bot.name}</h1>
+            <h1 className="text-xl font-bold">@{bot.username}</h1>
           </div>
-          <p className="text-muted-foreground">@{bot.username}</p>
+          <p className="text-muted-foreground">{bot.name}</p>
           <p className="text-sm mt-1">{bot.description}</p>
         </div>
       </div>
