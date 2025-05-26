@@ -109,7 +109,18 @@ export default function BotEditor({ botId }: { botId: string }) {
 
   const handleSubmit = async (prompt: { prompt: string; botId: string }) => {
     setIsGeneratingBot(true);
-    submit(prompt);
+    const sanitizedPrompt = prompt.prompt
+      .replace(/\t/g, " ") // Replace tabs with spaces
+      .replace(/\r/g, "") // Remove carriage returns
+      .replace(/\n/g, " ") // Replace newlines with spaces
+      .replace(/[\u0000-\u001F]+/g, "") // Remove other control characters
+      .trim();
+
+    // Call submit with sanitized string
+    submit({
+      ...prompt,
+      prompt: sanitizedPrompt,
+    });
   };
 
   return (

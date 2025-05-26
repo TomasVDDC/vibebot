@@ -3,7 +3,7 @@ import { Sandbox } from "@e2b/code-interpreter";
 import { getLatestBotCode, getBotToken } from "@/app/actions/actions";
 import { generateInitialPrompt } from "@/app/api/chat/prompt";
 
-const TIMEOUT = 180_000; // in ms
+const TIMEOUT = 300_000; // in ms
 
 export async function POST(req: Request) {
   console.log("Starting sandbox");
