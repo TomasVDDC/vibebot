@@ -2,6 +2,8 @@ import { SignedIn, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import InputBar from "@/components/InputBar";
+import { Github } from "lucide-react";
+
 export default function Home() {
   return (
     <div className="landing-page">
@@ -30,6 +32,12 @@ export default function Home() {
           <SignInButton>
             <Button className="px-4 py-2 rounded-md cursor-pointer bg-primary shadow-lg ">Get Started</Button>
           </SignInButton>
+          <Button className="default bg-white text-primary hover:bg-white shadow-lg" asChild>
+            <a href="https://github.com/TomasVDDC/vibebot" target="_blank" rel="noopener noreferrer">
+              <Github className="h-4 w-4" />
+              See the code
+            </a>
+          </Button>
         </div>
       </div>
     </div>

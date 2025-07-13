@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# What is VibeBot?
+
+VibeBot is a platform that simplifies the process of creating custom Telegram bots. Instead of writing code manually, users can:
+
+- **Chat with AI**: Describe what you want your bot to do in plain English
+- **Generate Bot Code**: The AI creates the necessary code based on your requirements
+- **Deploy Instantly**: Your bot is automatically deployed and ready to use on Telegram
+
+**🌐 [Visit VibeBot Website](https://vibe-bot.com/)**
+
+## Tech Stack
+
+### Frontend
+
+- **React 19** - Modern React with the latest features
+- **Next.js 15.3** - Full-stack React framework with App Router
+- **TypeScript 5** - Type-safe development
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **React Hook Form** + **Zod** - Form handling and validation
+- **React Query** - Server state management
+
+### Backend & Database
+
+- **PostgreSQL** - Relational database for storing bot data
+- **Drizzle ORM** - Type-safe database operations
+- **Next.js API Routes and Server Actions** - Server-side functionality
+- **Anthropic AI SDK** - Claude AI integration for bot generation
+- **Clerk** - Authentication and user management
+
+### Bot Execution Environment
+
+- **E2B Sandboxes** - Secure, isolated containers for running generated bot code
+- **Docker** - Containerization for consistent bot deployment
+- **Node.js Runtime** - JavaScript execution environment for Telegram bots
+- **Telegraf** - Modern Telegram Bot API framework
+- **Claude Code Integration** - AI-powered code generation and execution
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+   ```bash
+   git clone https://github.com/TomasVDDC/vibebot.git
+   cd vibebot-frontend
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file with your configuration:
+
+   ```bash
+   # Database
+   DATABASE_LOCAL_URL=your_postgresql_url
+
+   # Authentication (Clerk)
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+   CLERK_SECRET_KEY=your_clerk_secret
+
+   # AI Integration
+   ANTHROPIC_API_KEY=your_anthropic_key
+
+   ```
+
+4. **Run the development server**
+
+   ```bash
+   pnpm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+```
+├── app/                 # Next.js App Router pages
+│   ├── api/            # API routes
+│   ├── db/             # Database schema and configuration
+│   └── home/           # Main application pages
+├── components/         # Reusable UI components
+├── lib/               # Utility functions and helpers
+├── hooks/             # Custom React hooks
+└── sandbox-template/   # Bot deployment configuration
+    ├── e2b.Dockerfile  # Container definition for bot execution
+    ├── e2b.toml       # E2B sandbox configuration
+    └── docker-compose.yml # Local container orchestration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Bot Execution Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+VibeBot uses [**E2B (Code Interpreter)**](https://e2b.dev/) sandboxes to securely execute generated bot code. This provides several benefits:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### E2B Sandboxes
 
-## Learn More
+- **Isolated Execution**: Each bot runs in its own secure container
+- **Pre-configured Environment**: Comes with Node.js, npm, and essential tools
+- **Claude Code Integration**: Built-in AI assistant for code generation and debugging
+- **Template-based**: Uses `vibebot-template-v1` for consistent deployments
 
-To learn more about Next.js, take a look at the following resources:
+### Docker Configuration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The `sandbox-template/` directory contains:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **e2b.Dockerfile**: Defines the container environment with Node.js 23, Telegraf, and Claude Code
+- **docker-compose.yml**: Local development setup for testing bot containers
+- **Setup Scripts**: Automated configuration for Claude Code and VS Code server to test in development.
 
-## Deploy on Vercel
+### How It Works
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. User describes desired bot behavior in the chat interface
+2. AI generates JavaScript code using the Telegraf framework
+3. Code is deployed to an isolated E2B sandbox
+4. Bot runs securely with access to Telegram API
+5. Real-time monitoring and task tracking through the web interface
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License.

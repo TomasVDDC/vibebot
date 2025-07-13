@@ -286,15 +286,15 @@ export async function getSandboxStatus(botId: string) {
     //   onStderr: (data) => console.error("\nPOLLING TODOS ERROR:", data),
     //   timeoutMs: 10000,
     // });
-    // await sbx.commands.run("cat claude.log", {
-    //   background: true,
-    //   onStdout: (data) => {
-    //     const lines = data.split("\n").slice(0, 3).join("\n");
-    //     console.log("\nPOLLING CLAUDE LOG:", lines);
-    //   },
-    //   onStderr: (data) => console.error("\nPOLLING CLAUDE LOG ERROR:", data),
-    //   timeoutMs: 10000,
-    // });
+    await sbx.commands.run("cat claude.log", {
+      background: true,
+      onStdout: (data) => {
+        const lines = data.split("\n").slice(0, 3).join("\n");
+        console.log("\nPOLLING CLAUDE LOG:", lines);
+      },
+      onStderr: (data) => console.error("\nPOLLING CLAUDE LOG ERROR:", data),
+      timeoutMs: 10000,
+    });
 
     await sbx.commands.run("cat bot.js", {
       background: true,
